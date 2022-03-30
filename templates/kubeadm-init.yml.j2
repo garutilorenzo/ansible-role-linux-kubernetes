@@ -1,0 +1,45 @@
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+bootstrapTokens:
+- groups:
+  - system:bootstrappers:kubeadm:default-node-token
+  token: abcdef.0123456789abcdef
+  ttl: 24h0m0s
+  usages:
+  - signing
+  - authentication
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: {{ kubernetes_ip_address }}
+  bindPort: {{ kubernetes_api_default_port }}
+nodeRegistration:
+  criSocket: {{ cri_socket_paths[kubernetes_cri] }}
+  imagePullPolicy: IfNotPresent
+  name: {{ ansible_hostname|lower }}
+  taints: null
+---
+apiServer:
+  timeoutForControlPlane: 4m0s
+apiVersion: kubeadm.k8s.io/v1beta3
+certificatesDir: /etc/kubernetes/pki
+clusterName: kubernetes
+controllerManager: {}
+dns: {}
+imageRepository: k8s.gcr.io
+kind: ClusterConfiguration
+kubernetesVersion: {{ kubernetes_version }}
+{% if groups['kubemaster'] | length > 1  %}
+controlPlaneEndpoint: {{ kubernetes_vip_ip }}:{{ kubernetes_api_port }}
+{% endif %}
+networking:
+  dnsDomain: {{ kubernetes_dns_domain }}
+  podSubnet: {{ kubernetes_pod_subnet }}
+  serviceSubnet: {{ kubernetes_service_subnet }}
+scheduler: {}
+etcd:
+  local:
+    dataDir: /var/lib/etcd
+---
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+cgroupDriver: systemd

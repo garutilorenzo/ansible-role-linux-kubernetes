@@ -1,0 +1,58 @@
+---
+
+- name: disable ufw
+  ansible.builtin.systemd:
+    name: ufw 
+    state: stopped 
+    enabled: no
+  when: disable_firewall
+
+- name: load overlay kernel module
+  ansible.builtin.command: modprobe overlay
+
+- name: load br_netfilter kernel module
+  ansible.builtin.command: modprobe br_netfilter
+
+- name: load kernel modules - persistent
+  blockinfile:
+    path: /etc/modules-load.d/containerd.conf
+    create: yes
+    block: |
+      overlay
+      br_netfilter
+
+- name: Modify sysctl parameters - persistent
+  blockinfile:
+    path: /etc/sysctl.d/99-kubernetes-cri.conf
+    create: yes
+    block: |
+      net.bridge.bridge-nf-call-iptables  = 1
+      net.ipv4.ip_forward                 = 1
+      net.bridge.bridge-nf-call-ip6tables = 1
+
+- name: load br_netfilter kernel module
+  ansible.builtin.command: sysctl --system
+
+- name: check iptables version
+  ansible.builtin.shell: iptables --version
+  register: iptables_version
+  ignore_errors: yes
+
+- block:  
+    - community.general.alternatives:
+        name: iptables
+        path: /usr/sbin/iptables-legacy
+
+    - community.general.alternatives:
+        name: ip6tables
+        path: /usr/sbin/ip6tables-legacy
+
+    - ansible.builtin.reboot:
+        msg: "Reboot initiated by Ansible for iptables-legacy"
+        connect_timeout: 5
+        reboot_timeout: 300
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+        test_command: uptime
+  when: '"nf_tables" in iptables_version.stdout'
+  ignore_errors: "{{ ansible_check_mode }}"

@@ -1,0 +1,53 @@
+---
+
+- include_tasks: 
+    file: setup_hosts.yml
+    apply:
+      tags: k8s_hosts
+  tags: k8s_hosts
+  when: setup_vip
+
+- include_tasks: 
+    file: setup_vip.yml
+    apply:
+      tags: k8s_vip
+  tags: k8s_vip
+  when: 
+    - setup_vip
+    - inventory_hostname in groups['kubemaster']
+
+- include_tasks: 
+    file: "{{ item }}"
+    apply:
+      tags: preflight
+  with_first_found:
+    - "preflight_{{ ansible_os_family }}.yml"
+  tags: preflight
+
+- include_tasks: 
+    file: "{{ item }}"
+    apply:
+      tags: cri
+  with_first_found:
+    - "cri_{{ ansible_os_family }}.yml"
+  tags: cri
+
+- include_tasks: 
+    file: "{{ item }}"
+    apply:
+      tags: kubectl
+  with_first_found:
+    - "kubectl_{{ ansible_os_family }}.yml"
+  tags: kubectl
+
+- include_tasks: 
+    file: init_cluster.yml
+    apply:
+      tags: kubeinit
+  tags: kubeinit
+
+- include_tasks: 
+    file: join_cluster.yml
+    apply:
+      tags: kubejoin
+  tags: kubejoin

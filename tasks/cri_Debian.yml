@@ -1,0 +1,55 @@
+---
+
+- name: Install aptitude using apt
+  ansible.builtin.apt: 
+    name: aptitude 
+    state: present 
+    update_cache: yes 
+    force_apt_get: yes
+
+- name: Install required system packages
+  ansible.builtin.apt: 
+    name: 
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+    state: present
+
+- name: Add Docker GPG apt Key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- shell: lsb_release -cs
+  register: lsb_release
+
+- name: Add Docker Repository
+  ansible.builtin.apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu {{ lsb_release.stdout }} stable
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Install containerd.io
+  ansible.builtin.apt: 
+    name: containerd.io
+    state: present
+
+- name: Create containerd directory
+  ansible.builtin.file: 
+    name: /etc/containerd
+    state: directory
+
+- name: Render containerd default config
+  ansible.builtin.shell: containerd config default > /etc/containerd/config.toml
+
+- name: enable SystemdCgroup for containerd
+  ansible.builtin.replace:
+    path: /etc/containerd/config.toml
+    regexp: '^(\s*)SystemdCgroup(.*)$'
+    replace: '\1SystemdCgroup = true'
+  notify:
+    - reload containerd
+
+- name: Force all notified handlers to run now
+  meta: flush_handlers

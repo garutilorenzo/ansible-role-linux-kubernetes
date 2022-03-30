@@ -1,0 +1,20 @@
+---
+
+disable_firewall: no
+disable_selinux: no
+
+setup_vip: no
+
+kubernetes_version: 1.23.0
+kubernetes_cri: containerd
+kubernetes_cni: flannel
+kubernetes_dns_domain: cluster.local
+kubernetes_pod_subnet: 10.244.0.0/16
+kubernetes_service_subnet: 10.96.0.0/12
+kubernetes_api_default_port: 6443
+kubernetes_api_ha_port: 8443
+
+kubernetes_subnet: 192.168.25.0/24
+
+hacluster_password: k8sH4clusterPwd
+kubernetes_vip_ip: 192.168.25.225

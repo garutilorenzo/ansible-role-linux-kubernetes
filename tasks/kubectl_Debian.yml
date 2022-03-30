@@ -1,0 +1,21 @@
+---
+
+- name: Add Google GPG apt Key
+  ansible.builtin.apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Add Kubectl Repository
+  ansible.builtin.apt_repository:
+    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Install kubelet kubeadm kubectl
+  ansible.builtin.apt: 
+    name: 
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+    update_cache: yes 

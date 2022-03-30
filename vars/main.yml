@@ -1,0 +1,6 @@
+---
+
+cri_socket_paths:
+  containerd: /run/containerd/containerd.sock
+  docker: /var/run/dockershim.sock
+  crio: /var/run/crio/crio.sock

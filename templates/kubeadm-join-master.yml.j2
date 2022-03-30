@@ -1,0 +1,23 @@
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: JoinConfiguration
+discovery:
+  bootstrapToken:
+    token: {{ kubeadm_token }}
+    apiServerEndpoint: {{ kubernetes_vip_ip }}:{{ kubernetes_api_port }}
+    caCertHashes: 
+      - sha256:{{ kubeadm_ca_hash.stdout }}
+controlPlane:
+  localAPIEndpoint:
+    advertiseAddress:  {{ kubernetes_ip_address }}
+    bindPort: {{ kubernetes_api_default_port }}
+  certificateKey: {{ kubeadm_cert }}
+nodeRegistration:
+  criSocket: {{ cri_socket_paths[kubernetes_cri] }}
+  imagePullPolicy: IfNotPresent
+  name: {{ ansible_hostname|lower }}
+  taints: null
+---
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+cgroupDriver: systemd

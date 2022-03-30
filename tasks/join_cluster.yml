@@ -1,0 +1,123 @@
+---
+
+# - name: Check node status
+#   ansible.builtin.shell: kubectl get nodes -o json -o=jsonpath="{.items[*]['metadata.name']}" | grep {{ inventory_hostname }}
+#   ignore_errors: yes
+#   register: node_status
+
+- name: Check if /var/lib/kubelet directory exist
+  ansible.builtin.stat:
+    path: /var/lib/kubelet
+  register: kubelet_dir
+
+- debug: msg={{ kubelet_dir.stat.exists }}
+
+- set_fact:
+    api_server_endpoint: "{% if groups['kubemaster'] | length > 1 %}{{ kubernetes_vip_ip }}{% else %}{{ hostvars[groups['kubemaster'][0]]['ansible_default_ipv4']['address'] }}{% endif %}"
+    kubernetes_api_port: "{% if setup_vip %}{{ kubernetes_api_ha_port }}{% else %}{{ kubernetes_api_default_port }}{% endif %}"
+
+- name: "wait for kubeapi server"
+  uri:
+    url: "https://{{ api_server_endpoint }}:{{ kubernetes_api_port }}/healthz"
+    status_code: 200
+    validate_certs: no
+  register: result
+  until: result.status == 200
+  retries: 90
+  delay: 15
+
+- set_fact:
+    kubernetes_ip_address: "{{ item }}"
+  when: "item | ipaddr( kubernetes_subnet )"
+  with_items: "{{ ansible_all_ipv4_addresses | difference([kubernetes_vip_ip]) }}"
+
+- name: Check if kubeadm CA cert is accessible
+  stat:
+    path: "/etc/kubernetes/pki/ca.crt"
+    get_attributes: no
+    get_checksum: no
+    get_mime: no
+  register: kubeadm_ca_stat
+  delegate_to: "{{ groups['kubemaster'][0] }}"
+  run_once: true
+
+- name: Calculate kubeadm CA cert hash
+  shell: set -o pipefail && openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+  args:
+    executable: /bin/bash
+  register: kubeadm_ca_hash
+  when:
+    - kubeadm_ca_stat.stat is defined
+    - kubeadm_ca_stat.stat.exists
+  delegate_to: "{{ groups['kubemaster'][0] }}"
+  run_once: true
+  changed_when: false
+
+- name: Create kubeadm token for joining nodes with 24h expiration (default)
+  command: "kubeadm token create"
+  register: temp_token
+  delegate_to: "{{ groups['kubemaster'][0] }}"
+  run_once: true
+  when: kubeadm_token is not defined
+  changed_when: false
+
+- name: Create kubeadm cert for joining nodes with 24h expiration (default)
+  shell: "kubeadm init phase upload-certs --upload-certs | tail -n 1"
+  register: temp_cert
+  delegate_to: "{{ groups['kubemaster'][0] }}"
+  run_once: true
+  when: kubeadm_cert is not defined
+  changed_when: false
+
+- name: Set kubeadm_token to generated token
+  set_fact:
+    kubeadm_token: "{{ temp_token.stdout }}"
+  when: kubeadm_token is not defined
+
+- name: Set kubeadm_cert to generated cert
+  set_fact:
+    kubeadm_cert: "{{ temp_cert.stdout }}"
+  when: kubeadm_cert is not defined
+
+- block:
+    - name: render  kubeadm-join-master.yml
+      ansible.builtin.template:
+        src: kubeadm-join-master.yml.j2
+        dest: /root/kubeadm-join-master.yml
+    
+    - name: Cluster join - master
+      ansible.builtin.command: kubeadm join --config /root/kubeadm-join-master.yml
+      register: kubeadm_join
+      changed_when: kubeadm_join is success
+
+    - name: Create ~/.kube directory
+      ansible.builtin.file: 
+        name: ~/.kube
+        state: directory
+    
+    - name: Populate .kube/config file
+      ansible.builtin.copy: 
+        src: /etc/kubernetes/admin.conf
+        dest: ~/.kube/config
+        remote_src: yes
+  when:
+    - inventory_hostname in groups['kubemaster']
+    - kubelet_dir.stat.exists is defined 
+    - kubelet_dir.stat.exists == False
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- block:
+    - name: render kubeadm-join-worker.yml
+      ansible.builtin.template:
+        src: kubeadm-join-worker.yml.j2
+        dest: /root/kubeadm-join-worker.yml
+    
+    - name: Cluster join - worker
+      ansible.builtin.command: kubeadm join --config /root/kubeadm-join-worker.yml
+      register: kubeadm_join
+      changed_when: kubeadm_join is success
+  when:
+    - inventory_hostname in groups['kubeworker']
+    - kubelet_dir.stat.exists is defined 
+    - kubelet_dir.stat.exists == False
+  ignore_errors: "{{ ansible_check_mode }}"

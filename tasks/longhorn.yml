@@ -1,0 +1,14 @@
+---
+
+- name: Install aptitude using apt
+  ansible.builtin.apt: 
+    name: 
+      - open-iscsi
+      - nfs-common
+    state: present 
+
+- name: start and enable iscsid
+  ansible.builtin.systemd:
+    name: iscsid
+    state: started
+    enabled: yes

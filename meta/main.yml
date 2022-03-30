@@ -1,0 +1,10 @@
+---
+dependencies: []
+
+galaxy_info:
+  description: 'Setup HA K8s cluster'
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+  galaxy_tags: []

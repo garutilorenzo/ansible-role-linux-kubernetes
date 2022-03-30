@@ -1,0 +1,28 @@
+load_module /usr/lib/nginx/modules/ngx_stream_module.so;
+
+worker_processes 4;
+worker_rlimit_nofile 40000;
+
+events {
+    worker_connections 8192;
+}
+
+stream {
+    log_format  basic   '$time_iso8601 $remote_addr '
+                        '$protocol $status $bytes_sent $bytes_received '
+                        '$session_time $upstream_addr '
+                        '"$upstream_bytes_sent" "$upstream_bytes_received" "$upstream_connect_time"';
+
+    access_log  /var/log/nginx/k8s-access.log basic;
+
+    upstream k8s_servers {
+        least_conn;
+{% for srv in groups['kubemaster'] %}
+        server {{ srv }}:{{ kubernetes_api_default_port }} max_fails=3 fail_timeout=5s;
+{% endfor %}
+    }
+    server {
+        listen     {{ kubernetes_api_ha_port }};
+        proxy_pass k8s_servers;
+    }
+}
