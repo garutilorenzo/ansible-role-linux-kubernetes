@@ -1,0 +1,37 @@
+---
+
+- name: Install required system packages
+  ansible.builtin.apt: 
+    name: 
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+    state: present
+    update_cache: yes 
+    force_apt_get: yes
+
+- name: Add Google GPG apt Key
+  ansible.builtin.apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Add K8s Repository
+  ansible.builtin.apt_repository:
+    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Add Docker GPG apt Key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- shell: lsb_release -cs
+  register: lsb_release
+
+- name: Add Docker Repository
+  ansible.builtin.apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu {{ lsb_release.stdout }} stable
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"

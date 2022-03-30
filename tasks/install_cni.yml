@@ -1,0 +1,17 @@
+---
+
+- block:
+    - name: Download kube-flannel.yml
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+        dest: /root/kube-flannel.yml
+
+    - name: Set flannel iface
+      ansible.builtin.lineinfile:
+        path: /root/kube-flannel.yml
+        insertafter: '^(\s*).*kube-subnet-mgr(.*)$'
+        line: '        - --iface={{ kubernetes_iface }}'
+
+    - name: Install flannel
+      ansible.builtin.command: kubectl apply -f /root/kube-flannel.yml
+  when: kubernetes_cni == 'flannel'

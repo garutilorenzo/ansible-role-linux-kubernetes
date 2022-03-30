@@ -1,6 +1,6 @@
 ---
 
-- name: Install aptitude using apt
+- name: Install open-iscsi,nfs-common using apt
   ansible.builtin.apt: 
     name: 
       - open-iscsi

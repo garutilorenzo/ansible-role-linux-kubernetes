@@ -5,9 +5,6 @@
   when: "item | ipaddr( kubernetes_subnet )"
   with_items: "{{ ansible_all_ipv4_addresses | difference([kubernetes_vip_ip]) }}"
 
-- debug: msg={{ item }}
-  loop: "{{ ansible_play_batch }}"
-
 - name: Clean /etc/hosts
   ansible.builtin.lineinfile: 
     dest: /etc/hosts 

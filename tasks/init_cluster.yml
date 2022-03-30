@@ -28,6 +28,7 @@
       ansible.builtin.template:
         src: kubeadm-init.yml.j2
         dest: /root/kubeadm-init.yml
+    
     - set_fact:
         kubeadm_extra_args: "{% if groups['kubemaster'] | length > 1 %}--upload-certs{% else %}''{% endif %}"
 
@@ -46,8 +47,7 @@
         remote_src: yes
 
     - include_tasks: 
-        file: cni_flannel.yml
-      when: kubernetes_cni == 'flannel'
+        file: install_cni.yml
 
   when: 
     - inventory_hostname in groups['kubemaster']

@@ -1,0 +1,39 @@
+---
+
+- block:
+    - name: Install kubelet kubeadm kubectl
+      ansible.builtin.apt: 
+        name: 
+          - kubelet={{ kubernetes_version }}*
+          - kubeadm={{ kubernetes_version }}*
+          - kubectl={{ kubernetes_version }}*
+        state: present
+        update_cache: yes 
+      
+    - name: Prevent kubelet/kubeadm/kubectl from being upgraded
+      dpkg_selections:
+        name: "{{ item }}"
+        selection: hold
+      loop:
+        - kubelet
+        - kubeadm
+        - kubectl
+  when: ansible_os_family == 'Debian'
+
+- block:
+    - name: Install kubelet kubeadm kubectl
+      ansible.builtin.dnf: 
+        name: 
+          - kubelet={{ kubernetes_version }}*
+          - kubeadm={{ kubernetes_version }}*
+          - kubectl={{ kubernetes_version }}*
+        disable_excludes: kubernetes
+        state: present
+        update_cache: yes 
+      
+    - name: start and enable kubelet
+      ansible.builtin.systemd:
+        name: kubelet
+        state: started
+        enabled: yes
+  when: ansible_os_family == 'RedHat'

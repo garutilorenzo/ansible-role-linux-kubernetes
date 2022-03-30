@@ -1,7 +1,6 @@
 ---
 
 disable_firewall: no
-disable_selinux: no
 
 setup_vip: no
 

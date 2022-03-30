@@ -19,25 +19,27 @@
 - include_tasks: 
     file: "{{ item }}"
     apply:
-      tags: preflight
+      tags: repo
   with_first_found:
-    - "preflight_{{ ansible_os_family }}.yml"
+    - "setup_repo_{{ ansible_os_family }}.yml"
+  tags: repo
+
+- include_tasks: 
+    file: preflight.yml
+    apply:
+      tags: preflight
   tags: preflight
 
 - include_tasks: 
-    file: "{{ item }}"
+    file: install_cri.yml
     apply:
       tags: cri
-  with_first_found:
-    - "cri_{{ ansible_os_family }}.yml"
   tags: cri
 
 - include_tasks: 
-    file: "{{ item }}"
+    file: install_kubectl.yml
     apply:
       tags: kubectl
-  with_first_found:
-    - "kubectl_{{ ansible_os_family }}.yml"
   tags: kubectl
 
 - include_tasks: 
@@ -51,3 +53,9 @@
     apply:
       tags: kubejoin
   tags: kubejoin
+
+- include_tasks: 
+    file: longhorn.yml
+    apply:
+      tags: longhorn
+  tags: longhorn

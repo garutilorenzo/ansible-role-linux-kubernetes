@@ -1,11 +1,31 @@
 ---
 
-- name: disable ufw
-  ansible.builtin.systemd:
-    name: ufw 
-    state: stopped 
-    enabled: no
-  when: disable_firewall
+- block:
+    - name: disable ufw
+      ansible.builtin.systemd:
+        name: ufw 
+        state: stopped 
+        enabled: no
+      when: disable_firewall
+  when: ansible_os_family == 'Debian'
+
+- block:
+    - name: disable firewalld
+      ansible.builtin.systemd:
+        name: firewalld 
+        state: stopped 
+        enabled: no
+      when: disable_firewall
+
+    - name: Put SELinux in permissive mode, logging actions that would be blocked.
+      ansible.posix.selinux:
+        policy: targeted
+        state: permissive
+
+    - name: Disable SELinux
+      ansible.posix.selinux:
+        state: disabled
+  when: ansible_os_family == 'RedHat'
 
 - name: load overlay kernel module
   ansible.builtin.command: modprobe overlay

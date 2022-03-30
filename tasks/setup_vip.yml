@@ -1,7 +1,7 @@
 ---
 
-- name: Install pacemaker,pcs,corosync
-  ansible.builtin.apt:  
+- name: Install pacemaker,pcs,corosync,nginx
+  ansible.builtin.package:  
     name: 
       - pacemaker
       - pcs
