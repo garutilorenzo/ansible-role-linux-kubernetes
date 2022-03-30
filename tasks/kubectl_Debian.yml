@@ -14,8 +14,17 @@
 - name: Install kubelet kubeadm kubectl
   ansible.builtin.apt: 
     name: 
-      - kubelet
-      - kubeadm
-      - kubectl
+      - kubelet={{ kubernetes_version }}*
+      - kubeadm={{ kubernetes_version }}*
+      - kubectl={{ kubernetes_version }}*
     state: present
     update_cache: yes 
+  
+- name: Prevent kubelet/kubeadm/kubectl from being upgraded
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - kubelet
+    - kubeadm
+    - kubectl
