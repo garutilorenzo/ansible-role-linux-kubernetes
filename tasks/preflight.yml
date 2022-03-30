@@ -10,6 +10,18 @@
   when: ansible_os_family == 'Debian'
 
 - block:
+    - name: Install required system packages
+      ansible.builtin.dnf: 
+        name: 
+          - iptables-legacy
+        state: present
+    
+    - name: Install required system packages
+      ansible.builtin.dnf: 
+        name: 
+          - zram-generator-defaults
+        state: absent
+
     - name: disable firewalld
       ansible.builtin.systemd:
         name: firewalld 
@@ -53,6 +65,17 @@
 - name: load br_netfilter kernel module
   ansible.builtin.command: sysctl --system
 
+- name: Disable SWAP
+  ansible.builtin.shell: |
+    swapoff -a
+
+- name: Disable SWAP in fstab
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
+    replace: '#\1\2\3swap\4'
+    backup: yes
+
 - name: check iptables version
   ansible.builtin.shell: iptables --version
   register: iptables_version
@@ -61,10 +84,12 @@
 - block:  
     - community.general.alternatives:
         name: iptables
+        link: /usr/sbin/iptables
         path: /usr/sbin/iptables-legacy
 
     - community.general.alternatives:
         name: ip6tables
+        link: /usr/sbin/ip6tables
         path: /usr/sbin/ip6tables-legacy
 
     - ansible.builtin.reboot:

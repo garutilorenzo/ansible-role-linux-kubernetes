@@ -24,9 +24,9 @@
     - name: Install kubelet kubeadm kubectl
       ansible.builtin.dnf: 
         name: 
-          - kubelet={{ kubernetes_version }}*
-          - kubeadm={{ kubernetes_version }}*
-          - kubectl={{ kubernetes_version }}*
+          - kubelet-{{ kubernetes_version }}
+          - kubeadm-{{ kubernetes_version }}
+          - kubectl-{{ kubernetes_version }}
         disable_excludes: kubernetes
         state: present
         update_cache: yes 

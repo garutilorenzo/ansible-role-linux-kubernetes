@@ -1,19 +1,18 @@
 ---
 
 - name: Install required system packages
-  ansible.builtin.apt: 
+  ansible.builtin.dnf: 
     name: 
-      - redhat-lsb
+      - redhat-lsb-core
     state: present
     update_cache: yes 
-    force_apt_get: yes
 
 - shell: lsb_release -is
   register: lsb_release
 
 - name: Add Docker Repository
   ansible.builtin.get_url:
-    url:  https://download.docker.com/linux/{{ lsb_release.stdout }}/docker-ce.repo
+    url:  https://download.docker.com/linux/{{ lsb_release.stdout | lower }}/docker-ce.repo
     dest: /etc/yum.repos.d/docker-ce.repo
 
 - shell: uname -m

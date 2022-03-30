@@ -33,6 +33,13 @@
         replace: '\1SystemdCgroup = true'
       notify:
         - reload containerd
+    
+    - name: reload containerd
+      ansible.builtin.systemd:
+        name: containerd
+        state: started
+        enabled: yes
+        
   when: kubernetes_cri == 'containerd'
 
 - name: Force all notified handlers to run now
