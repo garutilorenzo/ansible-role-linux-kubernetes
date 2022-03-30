@@ -1,16 +1,9 @@
 ---
 
-# - name: Check node status
-#   ansible.builtin.shell: kubectl get nodes -o json -o=jsonpath="{.items[*]['metadata.name']}" | grep {{ inventory_hostname }}
-#   ignore_errors: yes
-#   register: node_status
-
 - name: Check if /var/lib/kubelet directory exist
   ansible.builtin.stat:
     path: /var/lib/kubelet
   register: kubelet_dir
-
-- debug: msg={{ kubelet_dir.stat.exists }}
 
 - set_fact:
     api_server_endpoint: "{% if groups['kubemaster'] | length > 1 %}{{ kubernetes_vip_ip }}{% else %}{{ hostvars[groups['kubemaster'][0]]['ansible_default_ipv4']['address'] }}{% endif %}"
