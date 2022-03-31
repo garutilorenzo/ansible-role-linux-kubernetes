@@ -10,13 +10,13 @@
   when: ansible_os_family == 'Debian'
 
 - block:
-    - name: Install required system packages
+    - name: Install iptables-legacy
       ansible.builtin.dnf: 
         name: 
           - iptables-legacy
         state: present
     
-    - name: Install required system packages
+    - name: Remove zram-generator-defaults
       ansible.builtin.dnf: 
         name: 
           - zram-generator-defaults
@@ -38,6 +38,12 @@
       ansible.posix.selinux:
         state: disabled
   when: ansible_os_family == 'RedHat'
+
+- name: Install openssl
+  ansible.builtin.package: 
+    name: 
+      - openssl
+    state: present
 
 - name: load overlay kernel module
   ansible.builtin.command: modprobe overlay

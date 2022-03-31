@@ -8,14 +8,15 @@
 - set_fact:
     kubernetes_init: "{% if kubernetes_init_host is defined and  kubernetes_init_host == inventory_hostname %}yes{% else %}no{% endif %}"
 
+- set_fact:
+    kubernetes_api_port: "{% if setup_vip %}{{ kubernetes_api_ha_port }}{% else %}{{ kubernetes_api_default_port }}{% endif %}"
+
+- set_fact:
+    kubernetes_ip_address: "{{ item }}"
+  when: "item | ipaddr( kubernetes_subnet )"
+  with_items: "{{ ansible_all_ipv4_addresses | difference([kubernetes_vip_ip]) }}"
+
 - block:
-    - set_fact:
-        kubernetes_api_port: "{% if setup_vip %}{{ kubernetes_api_ha_port }}{% else %}{{ kubernetes_api_default_port }}{% endif %}"
-    
-    - set_fact:
-        kubernetes_ip_address: "{{ item }}"
-      when: "item | ipaddr( kubernetes_subnet )"
-      with_items: "{{ ansible_all_ipv4_addresses | difference([kubernetes_vip_ip]) }}"
 
     - set_fact:
         kubernetes_iface: "{{ hostvars[inventory_hostname]['ansible_' + item ]['device'] }}"

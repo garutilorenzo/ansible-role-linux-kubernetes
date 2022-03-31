@@ -34,13 +34,57 @@
       notify:
         - reload containerd
     
-    - name: reload containerd
+    - name: start and enable containerd
       ansible.builtin.systemd:
         name: containerd
         state: started
         enabled: yes
         
   when: kubernetes_cri == 'containerd'
+
+# Fedora hack
+- name: Check if /opt/cni/bin directory exist
+  ansible.builtin.stat:
+    path: /opt/cni/bin
+  register: cni_bin_dir
+
+- block:
+    - name: Install containernetworking-plugins
+      ansible.builtin.package:
+        name: containernetworking-plugins
+        state: present
+
+    - name: stop containerd
+      ansible.builtin.systemd:
+        name: containerd
+        state: stopped
+
+    - name: Create /opt/cni/ directory
+      ansible.builtin.file: 
+        name: /opt/cni/
+        state: directory
+
+    - name: Remove /opt/cni/bin directory if exist
+      ansible.builtin.file: 
+        name: /opt/cni/bin
+        state: removed
+
+    - name: Create symlink from /usr/libexec/cni to /opt/cni/bin
+      ansible.builtin.file:
+        src: /usr/libexec/cni
+        dest: /opt/cni/bin
+        state: link
+
+    - name: start containerd
+      ansible.builtin.systemd:
+        name: containerd
+        state: started
+  when: 
+    - ansible_distribution == 'Fedora'
+    - kubernetes_cri == 'containerd'
+    - cni_bin_dir.stat.islnk is defined
+    - not cni_bin_dir.stat.islnk
+# END Fedora hack
 
 - name: Force all notified handlers to run now
   meta: flush_handlers

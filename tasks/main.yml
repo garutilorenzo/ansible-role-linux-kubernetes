@@ -24,6 +24,8 @@
     - "setup_repo_{{ ansible_os_family }}.yml"
   tags: repo
 
+- setup:
+
 - include_tasks: 
     file: preflight.yml
     apply:
