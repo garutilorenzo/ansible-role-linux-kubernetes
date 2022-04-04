@@ -8,15 +8,6 @@
   when: setup_vip
 
 - include_tasks: 
-    file: setup_vip.yml
-    apply:
-      tags: k8s_vip
-  tags: k8s_vip
-  when: 
-    - setup_vip
-    - inventory_hostname in groups['kubemaster']
-
-- include_tasks: 
     file: "{{ item }}"
     apply:
       tags: repo
@@ -55,6 +46,15 @@
     apply:
       tags: kubejoin
   tags: kubejoin
+
+- include_tasks: 
+    file: setup_vip.yml
+    apply:
+      tags: k8s_vip
+  tags: k8s_vip
+  when: 
+    - setup_vip
+    - inventory_hostname in groups['kubemaster']
 
 # TODO
 # - include_tasks: 

@@ -1,84 +1,11 @@
 ---
 
-- name: Install pacemaker,pcs,corosync,nginx
-  ansible.builtin.package:  
-    name: 
-      - pacemaker
-      - pcs
-      - corosync
-      - nginx
-    state: present
-    update_cache: yes
-  ignore_errors: "{{ ansible_check_mode }}"
+- name: Create /etc/kubernetes/manifests/ directory
+  ansible.builtin.file: 
+    name: /etc/kubernetes/manifests/
+    state: directory
 
-- name: Generate nginx.conf
+- name: render kube-vip.yml
   ansible.builtin.template:
-    src: nginx.conf.j2
-    dest: /etc/nginx/nginx.conf
-  notify:
-    - reload nginx
-
-- name: Force all notified handlers to run now
-  meta: flush_handlers
-
-- name: Check if /var/lib/pcsd/known-hosts file exist
-  ansible.builtin.stat:
-    path: /var/lib/pcsd/known-hosts
-  register: pcs_exist
-
-- block:
-    - name: Change hacluster user password
-      ansible.builtin.user:
-        name: hacluster
-        update_password: always
-        password: "{{ hacluster_password | password_hash('sha512') }}"
-
-    - name: enable cluster services
-      ansible.builtin.systemd: 
-        name: "{{ item }}" 
-        state: restarted 
-        enabled: yes
-      with_items: ['pcsd','corosync', 'pacemaker']
-
-    - name: 'set fact: list kubemaster_hosts'
-      set_fact:
-        kubemaster_hosts: >-
-          {{ groups['kubemaster']  | join(' ') }}
-
-    - name: destroy all cluster
-      ansible.builtin.command: pcs cluster destroy
-
-    - name: pcs host auth
-      ansible.builtin.command: pcs host auth {{ kubemaster_hosts }} -u hacluster -p {{ hacluster_password }}
-      run_once: true
-
-    - name: pcs cluster setup
-      ansible.builtin.command:  pcs cluster setup HA-K8S --start {{ kubemaster_hosts }}
-      run_once: true
-
-    - name: Start pcs cluster
-      ansible.builtin.command:  pcs cluster start --all
-      run_once: true
-
-    - name: enable pcs cluster
-      ansible.builtin.command:  pcs cluster enable --all
-      run_once: true
-
-    - name: set stonith-enabled to false
-      ansible.builtin.command: pcs property set stonith-enabled=false
-      run_once: true
-    
-    - name: create pcs resource k8s_ip
-      command: pcs resource create k8s_ip ocf:heartbeat:IPaddr2 ip={{ kubernetes_vip_ip }} cidr_netmask=24 op monitor interval=10s
-      run_once: true
-
-    - name: create pcs resource k8s_nginx
-      command: pcs resource create k8s_nginx ocf:heartbeat:nginx configfile=/etc/nginx/nginx.conf op monitor timeout="5s" interval="5s"
-      run_once: true
-    
-    - name: create k8s_group resource
-      command: pcs resource group add k8s_group k8s_nginx k8s_ip
-      run_once: true
-  when:
-    - pcs_exist.stat.exists is defined 
-    - pcs_exist.stat.exists == False
+    src: kube-vip.yml.j2
+    dest: /etc/kubernetes/manifests/kube-vip.yaml

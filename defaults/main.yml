@@ -17,3 +17,5 @@ kubernetes_subnet: 192.168.25.0/24
 
 hacluster_password: k8sH4clusterPwd
 kubernetes_vip_ip: 192.168.25.225
+
+kubevip_version: v0.4.3
