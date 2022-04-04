@@ -9,7 +9,7 @@ discovery:
       - sha256:{{ kubeadm_ca_hash.stdout }}
 controlPlane:
   localAPIEndpoint:
-    advertiseAddress:  {{ kubernetes_ip_address }}
+    advertiseAddress: {{ kubernetes_ip_address }}
     bindPort: {{ kubernetes_api_default_port }}
   certificateKey: {{ kubeadm_cert }}
 nodeRegistration:
