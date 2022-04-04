@@ -107,3 +107,20 @@
         test_command: uptime
   when: '"nf_tables" in iptables_version.stdout'
   ignore_errors: "{{ ansible_check_mode }}"
+
+- block:
+    - name: Install open-iscsi,nfs-common using apt
+      ansible.builtin.apt: 
+        name: 
+          - open-iscsi
+          - nfs-common
+        state: present 
+
+    - name: start and enable iscsid
+      ansible.builtin.systemd:
+        name: iscsid
+        state: started
+        enabled: yes
+  when:
+    - install_longhorn
+    - inventory_hostname in groups['kubeworker']

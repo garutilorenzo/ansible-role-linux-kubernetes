@@ -1,14 +1,22 @@
 ---
 
-- name: Install open-iscsi,nfs-common using apt
-  ansible.builtin.apt: 
-    name: 
-      - open-iscsi
-      - nfs-common
-    state: present 
+- block:
+    - name: Check if longhorn is installed
+      ansible.builtin.shell: kubectl get ns | grep longhorn-system
+      delegate_to: "{{ groups['kubemaster'][0] }}"
+      run_once: true
+      register: longorn_namespace_exist
+      ignore_errors: yes
 
-- name: start and enable iscsid
-  ansible.builtin.systemd:
-    name: iscsid
-    state: started
-    enabled: yes
+    - name: Install longhorn
+      ansible.builtin.command: kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/{{ longhorn_version }}/deploy/longhorn.yaml
+      delegate_to: "{{ groups['kubemaster'][0] }}"
+      run_once: true
+      when: longorn_namespace_exist.rc == 1
+
+    - name: Install longhorn storageclass
+      ansible.builtin.command: kubectl create -f https://raw.githubusercontent.com/longhorn/longhorn/{{ longhorn_version }}/examples/storageclass.yaml
+      delegate_to: "{{ groups['kubemaster'][0] }}"
+      run_once: true
+      when: longorn_namespace_exist.rc == 1
+  when: inventory_hostname in groups['kubemaster']
