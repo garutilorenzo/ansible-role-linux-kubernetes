@@ -10,7 +10,7 @@ discovery:
 controlPlane:
   localAPIEndpoint:
     advertiseAddress: {{ kubernetes_ip_address }}
-    bindPort: {{ kubernetes_api_default_port }}
+    bindPort: {{ kubernetes_api_port }}
   certificateKey: {{ kubeadm_cert }}
 nodeRegistration:
   criSocket: {{ cri_socket_paths[kubernetes_cri] }}

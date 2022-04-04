@@ -9,7 +9,7 @@ discovery:
       - sha256:{{ kubeadm_ca_hash.stdout }}
 localAPIEndpoint:
   advertiseAddress: {{ kubernetes_ip_address }}
-  bindPort: {{ kubernetes_api_default_port }}
+  bindPort: {{ kubernetes_api_port }}
 nodeRegistration:
   criSocket: {{ cri_socket_paths[kubernetes_cri] }}
   imagePullPolicy: IfNotPresent

@@ -7,7 +7,6 @@
 
 - set_fact:
     api_server_endpoint: "{% if groups['kubemaster'] | length > 1 %}{{ kubernetes_vip_ip }}{% else %}{{ hostvars[groups['kubemaster'][0]]['kubernetes_ip_address'] }}{% endif %}"
-    kubernetes_api_port: "{% if setup_vip %}{{ kubernetes_api_ha_port }}{% else %}{{ kubernetes_api_default_port }}{% endif %}"
 
 - name: "wait for kubeapi server"
   uri:
