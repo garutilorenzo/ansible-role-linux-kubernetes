@@ -78,6 +78,8 @@ To test this role you can use [Vagrant](https://www.vagrantup.com/) and [Virtual
 vagrant up
 ```
 
+In the Vagrantfile you can inject your public ssh key directly in the authorized_keys of the vagrant user. You have to change the *CHANGE_ME* placeholder in the Vagrantfile. You can also adjust the number of the vm deployed by changing the NNODES variable (Default: 6)
+
 ## Using this role
 
 To use this role you follow the example in the [examples/] dir. Adjust the hosts.ini file with your hosts and run the playbook:
