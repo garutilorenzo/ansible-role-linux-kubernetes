@@ -86,7 +86,7 @@ In the Vagrantfile you can inject your public ssh key directly in the authorized
 
 ## Using this role
 
-To use this role you follow the example in the [examples/] dir. Adjust the hosts.ini file with your hosts and run the playbook:
+To use this role you follow the example in the [examples/](examples/) dir. Adjust the hosts.ini file with your hosts and run the playbook:
 
 ```
 lorenzo@mint-virtual:~$ ansible-playbook -i hosts-ubuntu.ini site.yml -e kubernetes_init_host=k8s-ubuntu-0
