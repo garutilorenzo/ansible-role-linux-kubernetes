@@ -1,11 +1,11 @@
 ---
 
-- include_tasks: 
-    file: setup_hosts.yml
-    apply:
-      tags: k8s_hosts
-  tags: k8s_hosts
-  when: setup_vip
+# - include_tasks: 
+#     file: setup_hosts.yml
+#     apply:
+#       tags: k8s_hosts
+#   tags: k8s_hosts
+#   when: setup_vip
 
 - include_tasks: 
     file: "{{ item }}"
@@ -57,8 +57,8 @@
     - inventory_hostname in groups['kubemaster']
 
 # TODO
-# - include_tasks: 
-#     file: longhorn.yml
-#     apply:
-#       tags: longhorn
-#   tags: longhorn
+- include_tasks: 
+    file: longhorn.yml
+    apply:
+      tags: longhorn
+  tags: longhorn

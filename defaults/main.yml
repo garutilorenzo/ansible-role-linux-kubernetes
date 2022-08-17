@@ -2,9 +2,7 @@
 
 disable_firewall: no
 
-setup_vip: no
-
-kubernetes_version: 1.23.5
+kubernetes_version: 1.24.3
 kubernetes_cri: containerd
 kubernetes_cni: flannel
 kubernetes_dns_domain: cluster.local
@@ -14,10 +12,18 @@ kubernetes_api_port: 6443
 
 kubernetes_subnet: 192.168.25.0/24
 
-hacluster_password: k8sH4clusterPwd
+setup_vip: no
 kubernetes_vip_ip: 192.168.25.225
 
 kubevip_version: v0.4.3
 
 install_longhorn: no
 longhorn_version: v1.2.4
+
+sans_base:
+  - "kubernetes"
+  - "kubernetes.default"
+  - "kubernetes.default.svc"
+  - "kubernetes.default.svc.{{ kubernetes_dns_domain }}"
+  - "localhost"
+  - "127.0.0.1"

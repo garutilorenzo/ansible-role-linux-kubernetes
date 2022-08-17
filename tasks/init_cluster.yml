@@ -21,6 +21,9 @@
         - hostvars[inventory_hostname]['ansible_' + item ].ipv4 is defined 
         - hostvars[inventory_hostname]['ansible_' + item ]['ipv4']['address'] | ipaddr( kubernetes_subnet )
       with_items: "{{ ansible_interfaces }}"
+    
+    - set_fact:
+        apiserver_sans: "{{ (sans_base + [kubernetes_vip_ip] ) | unique }}"
 
     - name: render kubeadm-init.yml
       ansible.builtin.template:

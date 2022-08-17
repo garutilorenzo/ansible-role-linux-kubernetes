@@ -1,6 +1,6 @@
 ---
 
 cri_socket_paths:
-  containerd: /run/containerd/containerd.sock
-  docker: /var/run/dockershim.sock
-  crio: /var/run/crio/crio.sock
+  containerd: unix:///run/containerd/containerd.sock
+  docker: unix:///var/run/dockershim.sock
+  crio: unix:///var/run/crio/crio.sock

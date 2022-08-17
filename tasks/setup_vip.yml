@@ -16,3 +16,5 @@
   ansible.builtin.template:
     src: kube-vip.yml.j2
     dest: /etc/kubernetes/manifests/kube-vip.yaml
+  notify:
+    - wait kube-vip

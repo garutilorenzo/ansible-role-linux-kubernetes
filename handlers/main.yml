@@ -9,3 +9,19 @@
   ansible.builtin.systemd:
     name: nginx
     state: restarted
+
+- name: wait kube-vip - pause
+  ansible.builtin.pause:
+    minutes: 1
+  listen: "wait kube-vip"
+
+- name: "wait for kubeapi server"
+  uri:
+    url: "https://{{ kubernetes_vip_ip }}:{{ kubernetes_api_port }}/healthz"
+    status_code: 200
+    validate_certs: no
+  register: result
+  until: result.status == 200
+  retries: 90
+  delay: 15
+  listen: "wait kube-vip"
