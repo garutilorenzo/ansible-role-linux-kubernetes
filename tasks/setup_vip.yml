@@ -1,0 +1,20 @@
+---
+
+- set_fact:
+    kubernetes_iface: "{{ hostvars[inventory_hostname]['ansible_' + item ]['device'] }}"
+  when: 
+    - hostvars[inventory_hostname]['ansible_' + item ].ipv4 is defined 
+    - hostvars[inventory_hostname]['ansible_' + item ]['ipv4']['address'] | ipaddr( kubernetes_subnet )
+  with_items: "{{ ansible_interfaces }}"
+
+- name: Create /etc/kubernetes/manifests/ directory
+  ansible.builtin.file: 
+    name: /etc/kubernetes/manifests/
+    state: directory
+
+- name: render kube-vip.yml
+  ansible.builtin.template:
+    src: kube-vip.yml.j2
+    dest: /etc/kubernetes/manifests/kube-vip.yaml
+  notify:
+    - wait kube-vip
