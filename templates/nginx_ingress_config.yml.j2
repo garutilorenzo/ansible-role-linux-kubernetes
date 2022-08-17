@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-nginx-controller-loadbalancer
+  namespace: ingress-nginx
+spec:
+  selector:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
+      nodePort: {{nginx_ingress_controller_http_nodeport}}
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 443
+      nodePort: {{nginx_ingress_controller_https_nodeport}}
+  type: NodePort
+---
+apiVersion: v1
+data:
+  allow-snippet-annotations: "true"
+{% if enable_nginx_real_ip %}
+  enable-real-ip: "true"
+  proxy-real-ip-cidr: "{{ nginx_ingress_real_ip_cidr }}"
+{%  endif %}
+  proxy-body-size: "{{ nginx_ingress_proxy_body_size }}"
+{% if enable_nginx_ingress_proxy_protocol %}
+  use-proxy-protocol: "true"
+{%  endif %}
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.3.0
+  name: ingress-nginx-controller
+  namespace: ingress-nginx

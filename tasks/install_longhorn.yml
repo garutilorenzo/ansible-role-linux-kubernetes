@@ -1,0 +1,45 @@
+---
+
+- name: Check if longhorn is installed
+  ansible.builtin.shell: kubectl get ns | grep longhorn-system
+  delegate_to: "{{ groups['kubemaster'][0] }}"
+  run_once: true
+  register: longorn_namespace_exist
+  ignore_errors: yes
+
+- block:
+    - name: Download longhorn.yaml
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/longhorn/longhorn/{{ longhorn_version }}/deploy/longhorn.yaml
+        dest: /root/longhorn-{{ longhorn_version }}.yaml
+      delegate_to: "{{ groups['kubemaster'][0] }}"
+      run_once: true
+
+    - name: Add KUBELET_ROOT_DIR env var
+      ansible.builtin.lineinfile:
+        path: /root/longhorn-{{ longhorn_version }}.yaml
+        insertafter: 'value: "longhornio/csi-snapshotter:v3.0.3"'
+        line: '          - name: KUBELET_ROOT_DIR'
+      delegate_to: "{{ groups['kubemaster'][0] }}"
+      run_once: true
+
+    - name: Add KUBELET_ROOT_DIR env var, set value
+      ansible.builtin.lineinfile:
+        path: /root/longhorn-{{ longhorn_version }}.yaml
+        insertafter: '- name: KUBELET_ROOT_DIR'
+        line: '            value: "/var/lib/kubelet"'
+      delegate_to: "{{ groups['kubemaster'][0] }}"
+      run_once: true
+
+    - name: Install longhorn
+      ansible.builtin.command: kubectl apply -f /root/longhorn-{{ longhorn_version }}.yaml
+      delegate_to: "{{ groups['kubemaster'][0] }}"
+      run_once: true
+
+    - name: Install longhorn storageclass
+      ansible.builtin.command: kubectl create -f https://raw.githubusercontent.com/longhorn/longhorn/{{ longhorn_version }}/examples/storageclass.yaml
+      delegate_to: "{{ groups['kubemaster'][0] }}"
+      run_once: true
+  when: 
+    - inventory_hostname in groups['kubemaster']
+    - longorn_namespace_exist.rc == 1

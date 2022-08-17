@@ -1,0 +1,6 @@
+---
+
+disable_firewall: yes
+kubernetes_subnet: 192.168.25.0/24 
+
+setup_vip: yes

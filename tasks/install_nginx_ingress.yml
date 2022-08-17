@@ -1,0 +1,30 @@
+---
+
+- name: Check if ingress-nginx is installed
+  ansible.builtin.shell: kubectl get ns | grep ingress-nginx
+  delegate_to: "{{ groups['kubemaster'][0] }}"
+  run_once: true
+  register: nginx_namespace_exist
+  ignore_errors: yes
+
+- block:
+    - name: Install ingress-nginx
+      ansible.builtin.command: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/{{ nginx_ingress_controller_version }}/deploy/static/provider/baremetal/deploy.yaml
+      delegate_to: "{{ groups['kubemaster'][0] }}"
+      run_once: true
+
+    - name: render nginx_ingress_config.yml
+      ansible.builtin.template:
+        src: nginx_ingress_config.yml.j2
+        dest: /root/nginx_ingress_config.yml
+      delegate_to: "{{ groups['kubemaster'][0] }}"
+      run_once: true
+    
+    - name: Apply nginx ingress config
+      ansible.builtin.command: kubectl apply -f /root/nginx_ingress_config.yml
+      delegate_to: "{{ groups['kubemaster'][0] }}"
+      run_once: true
+      
+  when: 
+    - inventory_hostname in groups['kubemaster']
+    - nginx_namespace_exist.rc == 1

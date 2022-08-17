@@ -18,7 +18,16 @@ kubernetes_vip_ip: 192.168.25.225
 kubevip_version: v0.4.3
 
 install_longhorn: no
-longhorn_version: v1.2.4
+longhorn_version: v1.3.1
+
+install_nginx_ingress: no
+nginx_ingress_controller_version: controller-v1.3.0
+nginx_ingress_controller_http_nodeport: 30080
+nginx_ingress_controller_https_nodeport: 30443
+enable_nginx_ingress_proxy_protocol: no
+enable_nginx_real_ip: no
+nginx_ingress_real_ip_cidr: 0.0.0.0/0
+nginx_ingress_proxy_body_size: 20m
 
 sans_base:
   - "kubernetes"
