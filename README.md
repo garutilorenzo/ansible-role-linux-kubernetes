@@ -53,6 +53,10 @@ This role accept this variables:
 | `nginx_ingress_proxy_body_size`       | `no`       | `20m`       | nginx ingress controller max proxy body size  |
 | `sans_base`       | `no`       | `[list of values, see defaults/main.yml]`       | list of ip addresses or FQDN uset to sign the kube-api certificate  |
 
+## Extra Variables
+
+This role accept an extra variable *kubernetes_init_host*. This variable is used when the cluster is bootstrapped for the first time. The value of this variable must be the hostname of one of the master nodes. When ansible will run on the matched host kubernetes will be initialized.
+
 ## Cluster resource deployed
 
 Whit this role [Nginx ingress controller](#nginx-ingress-controller) and [Longhorn](#longhorn) will be installed.
