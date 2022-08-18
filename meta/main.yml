@@ -11,4 +11,10 @@ galaxy_info:
     - name: EL
       versions:
         - 8
-  galaxy_tags: []
+  galaxy_tags:
+    - kubernetes
+    - k8s
+    - kubeadm
+    - cluster
+    - multinode
+    - infrastructure
