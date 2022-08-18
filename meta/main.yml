@@ -2,9 +2,13 @@
 dependencies: []
 
 galaxy_info:
-  description: 'Setup HA K8s cluster'
+  description: 'Install and configure a high available Kubernetes cluster'
   platforms:
     - name: Ubuntu
       versions:
-        - all
+        - jammy
+        - focal
+    - name: EL
+      versions:
+        - 8
   galaxy_tags: []
