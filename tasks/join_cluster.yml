@@ -6,6 +6,11 @@
   register: kubelet_dir
 
 - set_fact:
+    kubernetes_ip_address: "{{ item }}"
+  when: "item | ipaddr( kubernetes_subnet )"
+  with_items: "{{ ansible_all_ipv4_addresses | difference([kubernetes_vip_ip]) }}"
+
+- set_fact:
     api_server_endpoint: "{% if groups['kubemaster'] | length > 1 %}{{ kubernetes_vip_ip }}{% else %}{{ hostvars[groups['kubemaster'][0]]['kubernetes_ip_address'] }}{% endif %}"
 
 - name: "wait for kubeapi server"
@@ -17,11 +22,6 @@
   until: result.status == 200
   retries: 90
   delay: 15
-
-- set_fact:
-    kubernetes_ip_address: "{{ item }}"
-  when: "item | ipaddr( kubernetes_subnet )"
-  with_items: "{{ ansible_all_ipv4_addresses | difference([kubernetes_vip_ip]) }}"
 
 - name: Check if kubeadm CA cert is accessible
   stat:
