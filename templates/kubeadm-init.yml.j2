@@ -29,7 +29,7 @@ certificatesDir: /etc/kubernetes/pki
 clusterName: kubernetes
 controllerManager: {}
 dns: {}
-imageRepository: k8s.gcr.io
+imageRepository: {{ kubernetes_image_repository }}
 kind: ClusterConfiguration
 kubernetesVersion: {{ kubernetes_version }}
 {% if groups['kubemaster'] | length > 1  %}

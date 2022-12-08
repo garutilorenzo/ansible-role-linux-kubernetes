@@ -13,6 +13,10 @@
   when: "item | ipaddr( kubernetes_subnet )"
   with_items: "{{ ansible_all_ipv4_addresses | difference([kubernetes_vip_ip]) }}"
 
+- set_fact:
+    kubernetes_image_repository: "k8s.gcr.io"
+  when: kubernetes_version is version("1.25.0", '<')
+
 - block:
 
     - set_fact:

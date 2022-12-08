@@ -31,7 +31,7 @@ This role accept this variables:
 | ------- | ------- | ----------- |  ----------- |
 | `kubernetes_subnet`       | `yes`       |  `192.168.25.0/24` | Subnet where Kubernetess will be deployed. If the VM or bare metal server has more than one interface, Ansible will filter the interface used by Kubernetes based on the interface subnet |
 | `disable_firewall`       | `no`       | `no`       | If set to yes Ansible will disable the firewall.   |
-| `kubernetes_version`       | `no`       | `1.24.3`       | Kubernetes version to install  |
+| `kubernetes_version`       | `no`       | `1.25.0`       | Kubernetes version to install  |
 | `kubernetes_cri`       | `no`       | `containerd`       | Kubernetes [CRI](https://kubernetes.io/docs/concepts/architecture/cri/) to install.   |
 | `kubernetes_cni`       | `no`       | `flannel`       | Kubernetes [CNI](https://github.com/containernetworking/cni) to install.  |
 | `kubernetes_dns_domain`       | `no`       | `cluster.local`       | Kubernetes default DNS domain  |
