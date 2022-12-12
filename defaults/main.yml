@@ -2,7 +2,7 @@
 
 disable_firewall: no
 
-kubernetes_version: 1.24.3
+kubernetes_version: 1.25.0
 kubernetes_cri: containerd
 kubernetes_cni: flannel
 kubernetes_dns_domain: cluster.local
