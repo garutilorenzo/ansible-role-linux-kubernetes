@@ -15,10 +15,17 @@
       delegate_to: "{{ groups['kubemaster'][0] }}"
       run_once: true
 
+    - name: get csi snapshotter version
+      command: >
+        awk -F: '/csi-snapshotter/{print substr($3, 1, length($3)-1)}' "/root/longhorn-{{ longhorn_version }}.yaml"
+      delegate_to: "{{ groups['kubemaster'][0] }}"
+      register: csi_snapshotter_version
+      run_once: true
+
     - name: Add KUBELET_ROOT_DIR env var
       ansible.builtin.lineinfile:
         path: /root/longhorn-{{ longhorn_version }}.yaml
-        insertafter: 'value: "longhornio/csi-snapshotter:v3.0.3"'
+        insertafter: 'value: \"longhornio/csi-snapshotter:{{csi_snapshotter_version.stdout}}\"'
         line: '          - name: KUBELET_ROOT_DIR'
       delegate_to: "{{ groups['kubemaster'][0] }}"
       run_once: true
