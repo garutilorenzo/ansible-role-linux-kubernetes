@@ -5,7 +5,7 @@
   delegate_to: "{{ groups['kubemaster'][0] }}"
   run_once: true
   register: longorn_namespace_exist
-  ignore_errors: yes
+  ignore_errors: true
 
 - block:
     - name: Download longhorn.yaml
