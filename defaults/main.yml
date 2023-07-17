@@ -2,7 +2,7 @@
 
 disable_firewall: no
 
-kubernetes_version: 1.25.0
+kubernetes_version: 1.27.3
 kubernetes_cri: containerd
 kubernetes_cni: flannel
 kubernetes_dns_domain: cluster.local
@@ -15,13 +15,13 @@ kubernetes_subnet: 192.168.25.0/24
 setup_vip: no
 kubernetes_vip_ip: 192.168.25.225
 
-kubevip_version: v0.4.3
+kubevip_version: v0.6.0
 
 install_longhorn: no
-longhorn_version: v1.3.1
+longhorn_version: v1.4.3
 
 install_nginx_ingress: no
-nginx_ingress_controller_version: controller-v1.3.0
+nginx_ingress_controller_version: controller-v1.8.1
 nginx_ingress_controller_http_nodeport: 30080
 nginx_ingress_controller_https_nodeport: 30443
 enable_nginx_ingress_proxy_protocol: no
