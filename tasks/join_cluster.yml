@@ -7,7 +7,7 @@
 
 - set_fact:
     kubernetes_ip_address: "{{ item }}"
-  when: "item | ipaddr( kubernetes_subnet )"
+  when: "item | ansible.utils.ipaddr( kubernetes_subnet )"
   with_items: "{{ ansible_all_ipv4_addresses | difference([kubernetes_vip_ip]) }}"
 
 - set_fact:

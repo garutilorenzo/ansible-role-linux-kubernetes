@@ -4,7 +4,7 @@
     kubernetes_iface: "{{ hostvars[inventory_hostname]['ansible_' + item ]['device'] }}"
   when: 
     - hostvars[inventory_hostname]['ansible_' + item ].ipv4 is defined 
-    - hostvars[inventory_hostname]['ansible_' + item ]['ipv4']['address'] | ipaddr( kubernetes_subnet )
+    - hostvars[inventory_hostname]['ansible_' + item ]['ipv4']['address'] | ansible.utils.ipaddr( kubernetes_subnet )
   with_items: "{{ ansible_interfaces }}"
 
 - name: Create /etc/kubernetes/manifests/ directory

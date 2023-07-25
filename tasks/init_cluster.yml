@@ -10,7 +10,7 @@
 
 - set_fact:
     kubernetes_ip_address: "{{ item }}"
-  when: "item | ipaddr( kubernetes_subnet )"
+  when: "item | ansible.utils.ipaddr( kubernetes_subnet )"
   with_items: "{{ ansible_all_ipv4_addresses | difference([kubernetes_vip_ip]) }}"
 
 - set_fact:
@@ -22,7 +22,7 @@
         kubernetes_iface: "{{ hostvars[inventory_hostname]['ansible_' + item ]['device'] }}"
       when: 
         - hostvars[inventory_hostname]['ansible_' + item ].ipv4 is defined 
-        - hostvars[inventory_hostname]['ansible_' + item ]['ipv4']['address'] | ipaddr( kubernetes_subnet )
+        - hostvars[inventory_hostname]['ansible_' + item ]['ipv4']['address'] | ansible.utils.ipaddr( kubernetes_subnet )
       with_items: "{{ ansible_interfaces }}"
     
     - set_fact:
@@ -63,4 +63,5 @@
     - inventory_hostname in groups['kubemaster']
     - kubernetes_init
     - cluster_exist.rc == 1
+  any_errors_fatal: true
   ignore_errors: "{{ ansible_check_mode }}"

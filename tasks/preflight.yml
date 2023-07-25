@@ -85,7 +85,7 @@
 - name: check iptables version
   ansible.builtin.shell: iptables --version
   register: iptables_version
-  ignore_errors: yes
+  ignore_errors: true
 
 - block:  
     - community.general.alternatives:
