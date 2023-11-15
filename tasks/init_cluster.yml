@@ -14,7 +14,7 @@
   with_items: "{{ ansible_all_ipv4_addresses | difference([kubernetes_vip_ip]) }}"
 
 - set_fact:
-    kubernetes_image_repository: "{% if kubernetes_version is version('1.25.0', '<') %}k8s.gcr.io{% else %}registry.k8s.io{% endif %}"
+    kubernetes_image_repository: "registry.k8s.io"
   
 - block:
 
