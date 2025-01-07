@@ -23,8 +23,7 @@
 
     - name: Render containerd default config
       ansible.builtin.shell: containerd config default > /etc/containerd/config.toml
-      when: 
-        - containerd_config.found
+      when: containerd_config.found
 
     - name: enable SystemdCgroup for containerd
       ansible.builtin.replace:
@@ -33,6 +32,36 @@
         replace: '\1SystemdCgroup = true'
       notify:
         - reload containerd
+    
+    - name: Update the [grpc] block in /etc/containerd/config.toml
+      ansible.builtin.blockinfile:
+        path: /etc/containerd/config.toml
+        marker: "{mark}"
+        block: |2
+            address = "{{ cri_socket_paths[kubernetes_cri] }}"
+            gid = 0
+            max_recv_message_size = 16777216
+            max_send_message_size = 16777216
+            tcp_address = ""
+            tcp_tls_ca = ""
+            tcp_tls_cert = ""
+            tcp_tls_key = ""
+            uid = 0
+        marker_begin: "[grpc]"
+        marker_end: "[metrics]"
+      notify:
+        - reload containerd
+
+    - name: Update sandbox_image in /etc/containerd/config.toml
+      ansible.builtin.lineinfile:
+        path: /etc/containerd/config.toml
+        regexp: '^\s*sandbox_image\s*=.*'
+        line: '    sandbox_image = "registry.k8s.io/pause:3.10"'
+        
+    - name: render crictl.yaml
+      ansible.builtin.template:
+        src: crictl.yaml.j2
+        dest: /etc/crictl.yaml
     
     - name: start and enable containerd
       ansible.builtin.systemd:

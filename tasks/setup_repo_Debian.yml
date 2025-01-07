@@ -1,5 +1,8 @@
 ---
 
+- ansible.builtin.set_fact:
+    kubernetes_major: "{{ kubernetes_version | regex_replace('^([0-9]+\\.[0-9]+)\\..*', '\\1') }}"
+
 - name: Install required system packages
   ansible.builtin.apt: 
     name: 
@@ -11,16 +14,23 @@
     update_cache: yes 
     force_apt_get: yes
 
-- name: Add Google GPG apt Key
-  ansible.builtin.apt_key:
-    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-    state: present
+- name: Create /etc/apt/keyrings/ directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings/
+    state: directory
+    mode: '0755'
+
+- name: Add K8s Repository key
+  ansible.builtin.get_url:
+    url:  https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_major }}/deb/Release.key
+    dest: /etc/apt/keyrings/kubernetes-apt-keyring.key
 
 - name: Add K8s Repository
-  ansible.builtin.apt_repository:
-    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
-    state: present
-  ignore_errors: "{{ ansible_check_mode }}"
+  ansible.builtin.lineinfile:
+    path: /etc/apt/sources.list.d/kubernetes.list
+    regexp: '^deb'
+    line: deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.key] https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_major }}/deb/ /
+    create: yes
 
 - name: Add Docker GPG apt Key
   ansible.builtin.apt_key:

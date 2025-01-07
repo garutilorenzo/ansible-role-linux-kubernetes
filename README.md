@@ -7,7 +7,7 @@
 
 This ansible role will install and configure a high available Kubernetes cluster. This repo automate the installation process of Kubernetes using [kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/).
 
-This repo is only a example on how to use Ansible automation to install and configure a Kubernetes cluster. For a production environment use [Kubespray](https://kubernetes.io/docs/setup/production-environment/tools/kubespray/)
+This repo is only a example on how to use Ansible automation to install and configure a Kubernetes cluster. For a production environment use [Kubespray](https://kubespray.io)
 
 ## Requirements
 

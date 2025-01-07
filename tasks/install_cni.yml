@@ -1,5 +1,19 @@
 ---
 
+- ansible.builtin.set_fact:
+    kubernetes_iface: "{{ hostvars[inventory_hostname]['ansible_' + item ]['device'] }}"
+  when: 
+    - ansible_interfaces | length > 2
+    - kubernetes_vip_ip is defined
+    - hostvars[inventory_hostname]['ansible_' + item ].ipv4 is defined 
+    - hostvars[inventory_hostname]['ansible_' + item ]['ipv4']['address'] | ansible.utils.ipaddr( kubernetes_subnet )
+  with_items: "{{ ansible_interfaces }}"
+
+- ansible.builtin.set_fact:
+    kubernetes_iface: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['interface'] }}"
+  when: 
+    - ansible_interfaces | length <= 2
+
 - block:
     - name: Download kube-flannel.yml
       ansible.builtin.get_url:

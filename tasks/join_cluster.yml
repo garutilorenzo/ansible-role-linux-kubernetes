@@ -5,12 +5,12 @@
     path: /var/lib/kubelet
   register: kubelet_dir
 
-- set_fact:
+- ansible.builtin.set_fact:
     kubernetes_ip_address: "{{ item }}"
   when: "item | ansible.utils.ipaddr( kubernetes_subnet )"
   with_items: "{{ ansible_all_ipv4_addresses | difference([kubernetes_vip_ip]) }}"
 
-- set_fact:
+- ansible.builtin.set_fact:
     api_server_endpoint: "{% if groups['kubemaster'] | length > 1 %}{{ kubernetes_vip_ip }}{% else %}{{ hostvars[groups['kubemaster'][0]]['kubernetes_ip_address'] }}{% endif %}"
 
 - name: "wait for kubeapi server"
@@ -62,12 +62,12 @@
   changed_when: false
 
 - name: Set kubeadm_token to generated token
-  set_fact:
+  ansible.builtin.set_fact:
     kubeadm_token: "{{ temp_token.stdout }}"
   when: kubeadm_token is not defined
 
 - name: Set kubeadm_cert to generated cert
-  set_fact:
+  ansible.builtin.set_fact:
     kubeadm_cert: "{{ temp_cert.stdout }}"
   when: kubeadm_cert is not defined
 

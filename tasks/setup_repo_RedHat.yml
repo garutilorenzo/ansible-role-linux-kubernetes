@@ -1,5 +1,8 @@
 ---
 
+- ansible.builtin.set_fact:
+    kubernetes_major: "{{ kubernetes_version | regex_replace('^([0-9]+\\.[0-9]+)\\..*', '\\1') }}"
+
 - name: Install required system packages
   ansible.builtin.dnf: 
     name: 
@@ -25,9 +28,8 @@
     block: |
       [kubernetes]
       name=Kubernetes
-      baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-{{ uname_m.stdout }}
+      baseurl=https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_major }}/rpm/
       enabled=1
       gpgcheck=1
-      repo_gpgcheck=1
-      gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-      exclude=kubelet kubeadm kubectl
+      gpgkey=https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_major }}/rpm/repodata/repomd.xml.key
+      exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
