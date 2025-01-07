@@ -52,6 +52,8 @@
       notify:
         - reload containerd
 
+    # container runtime is inconsistent with that used by kubeadm
+    # Ref. https://github.com/kubernetes/kubeadm/issues/3146
     - name: Update sandbox_image in /etc/containerd/config.toml
       ansible.builtin.lineinfile:
         path: /etc/containerd/config.toml

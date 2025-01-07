@@ -22,6 +22,8 @@
     name: /etc/kubernetes/manifests/
     state: directory
 
+# kubevip needs super-admin.conf privileges
+# Ref. https://github.com/kube-vip/kube-vip/issues/684
 - name: render kube-vip.yml
   ansible.builtin.template:
     src: kube-vip-init.yml.j2
