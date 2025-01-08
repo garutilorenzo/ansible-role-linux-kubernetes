@@ -3,6 +3,7 @@
 disable_firewall: no
 
 kubernetes_version: 1.31.4
+kubernetes_image_repository: registry.k8s.io
 kubernetes_cri: containerd
 kubernetes_cni: flannel
 kubernetes_dns_domain: cluster.local
@@ -16,6 +17,7 @@ setup_vip: no
 kubernetes_vip_ip: 192.168.25.225
 
 kubevip_version: v0.8.7
+flannel_version: v0.26.2
 
 install_longhorn: no
 longhorn_version: v1.4.3
