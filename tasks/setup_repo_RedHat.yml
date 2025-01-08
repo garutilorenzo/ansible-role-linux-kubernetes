@@ -1,8 +1,5 @@
 ---
 
-- ansible.builtin.set_fact:
-    kubernetes_major: "{{ kubernetes_version | regex_replace('^([0-9]+\\.[0-9]+)\\..*', '\\1') }}"
-
 - name: Install required system packages
   ansible.builtin.dnf: 
     name: 

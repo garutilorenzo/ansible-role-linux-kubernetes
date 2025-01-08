@@ -1,14 +1,9 @@
 ---
 
-- name: Check if /var/lib/kubelet directory exist
+- name: Check if /var/lib/kubelet/config.yaml file exist
   ansible.builtin.stat:
-    path: /var/lib/kubelet
-  register: kubelet_dir
-
-- ansible.builtin.set_fact:
-    kubernetes_ip_address: "{{ item }}"
-  when: "item | ansible.utils.ipaddr( kubernetes_subnet )"
-  with_items: "{{ ansible_all_ipv4_addresses | difference([kubernetes_vip_ip]) }}"
+    path: /var/lib/kubelet/config.yaml
+  register: kubelet_config_file
 
 - ansible.builtin.set_fact:
     api_server_endpoint: "{% if groups['kubemaster'] | length > 1 %}{{ kubernetes_vip_ip }}{% else %}{{ hostvars[groups['kubemaster'][0]]['kubernetes_ip_address'] }}{% endif %}"
@@ -94,8 +89,8 @@
         remote_src: yes
   when:
     - inventory_hostname in groups['kubemaster']
-    - kubelet_dir.stat.exists is defined 
-    - kubelet_dir.stat.exists == False
+    - kubelet_config_file.stat.exists is defined 
+    - kubelet_config_file.stat.exists == False
   ignore_errors: "{{ ansible_check_mode }}"
 
 - block:
@@ -110,6 +105,6 @@
       changed_when: kubeadm_join is success
   when:
     - inventory_hostname in groups['kubeworker']
-    - kubelet_dir.stat.exists is defined 
-    - kubelet_dir.stat.exists == False
+    - kubelet_config_file.stat.exists is defined 
+    - kubelet_config_file.stat.exists == False
   ignore_errors: "{{ ansible_check_mode }}"

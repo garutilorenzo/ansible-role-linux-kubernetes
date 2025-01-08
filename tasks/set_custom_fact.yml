@@ -1,0 +1,40 @@
+---
+
+- ansible.builtin.set_fact:
+    kubernetes_init: "{% if kubernetes_init_host is defined and  kubernetes_init_host == inventory_hostname %}yes{% else %}no{% endif %}"
+    kubernetes_major: "{{ kubernetes_version | regex_replace('^([0-9]+\\.[0-9]+)\\..*', '\\1') }}"
+
+- ansible.builtin.set_fact:
+    kubernetes_api_version: kubeadm.k8s.io/v1beta4
+  when: kubernetes_major is ansible.builtin.version('1.31','>=')
+
+- ansible.builtin.set_fact:
+    kubernetes_api_version: kubeadm.k8s.io/v1beta3
+  when: kubernetes_major is ansible.builtin.version('1.31', '<')
+
+- ansible.builtin.set_fact:
+    kubernetes_ip_address: "{{ item }}"
+  when: 
+    - ansible_interfaces | length > 2
+    - kubernetes_vip_ip is defined
+    - "item | ansible.utils.ipaddr( kubernetes_subnet )"
+  with_items: "{{ ansible_all_ipv4_addresses | difference([kubernetes_vip_ip]) }}"
+
+- ansible.builtin.set_fact:
+    kubernetes_ip_address: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+  when: 
+    - ansible_interfaces | length <= 2
+
+- ansible.builtin.set_fact:
+    kubernetes_iface: "{{ hostvars[inventory_hostname]['ansible_' + item ]['device'] }}"
+  when: 
+    - ansible_interfaces | length > 2
+    - kubernetes_vip_ip is defined
+    - hostvars[inventory_hostname]['ansible_' + item ].ipv4 is defined 
+    - hostvars[inventory_hostname]['ansible_' + item ]['ipv4']['address'] | ansible.utils.ipaddr( kubernetes_subnet )
+  with_items: "{{ ansible_interfaces }}"
+
+- ansible.builtin.set_fact:
+    kubernetes_iface: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['interface'] }}"
+  when: 
+    - ansible_interfaces | length <= 2

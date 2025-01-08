@@ -1,5 +1,5 @@
 ---
-apiVersion: kubeadm.k8s.io/v1beta4
+apiVersion: {{ kubernetes_api_version }}
 bootstrapTokens:
 - groups:
   - system:bootstrappers:kubeadm:default-node-token
@@ -20,6 +20,7 @@ nodeRegistration:
   taints:
   - effect: NoSchedule
     key: node-role.kubernetes.io/control-plane
+{% if kubernetes_api_version == 'kubeadm.k8s.io/v1beta4' %}
 timeouts:
   controlPlaneComponentHealthCheck: 4m0s
   discovery: 5m0s
@@ -28,13 +29,17 @@ timeouts:
   kubernetesAPICall: 1m0s
   tlsBootstrap: 5m0s
   upgradeManifests: 5m0s
+{% endif %}
 ---
 apiServer:
+{% if kubernetes_api_version == 'kubeadm.k8s.io/v1beta3' %}
+  timeoutForControlPlane: 4m0s
+{% endif %}
   certSANs: 
 {% for san in apiserver_sans %}
   - "{{ san }}"
 {% endfor %}
-apiVersion: kubeadm.k8s.io/v1beta4
+apiVersion: {{ kubernetes_api_version }}
 certificatesDir: /etc/kubernetes/pki
 clusterName: kubernetes
 controllerManager: {}
@@ -45,13 +50,17 @@ kubernetesVersion: {{ kubernetes_version }}
 {% if groups['kubemaster'] | length > 1  %}
 controlPlaneEndpoint: {{ kubernetes_vip_ip }}:{{ kubernetes_api_port }}
 {% endif %}
+{% if kubernetes_api_version == 'kubeadm.k8s.io/v1beta4' %}
 caCertificateValidityPeriod: 87600h0m0s
 certificateValidityPeriod: 8760h0m0s
+{% endif %}
 networking:
   dnsDomain: {{ kubernetes_dns_domain }}
   podSubnet: {{ kubernetes_pod_subnet }}
   serviceSubnet: {{ kubernetes_service_subnet }}
+{% if kubernetes_api_version == 'kubeadm.k8s.io/v1beta4' %}
 proxy: {}
+{% endif %}
 scheduler: {}
 etcd:
   local:

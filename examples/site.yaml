@@ -1,4 +1,15 @@
 ---
+
+- hosts: kubernetes
+  become: yes
+  remote_user: vagrant
+  tasks:
+    - ansible.builtin.import_role:
+        name: ansible-role-linux-kubernetes
+        tasks_from: set_custom_fact
+  vars_files:
+    - vars.yaml
+
 - hosts: kubemaster
   become: yes
   remote_user: vagrant

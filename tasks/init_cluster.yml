@@ -4,25 +4,6 @@
   ansible.builtin.shell: kubectl get nodes
   ignore_errors: true
   register: cluster_exist
-
-- ansible.builtin.set_fact:
-    kubernetes_init: "{% if kubernetes_init_host is defined and  kubernetes_init_host == inventory_hostname %}yes{% else %}no{% endif %}"
-
-- ansible.builtin.set_fact:
-    kubernetes_ip_address: "{{ item }}"
-  when: 
-    - ansible_interfaces | length > 2
-    - kubernetes_vip_ip is defined
-    - "item | ansible.utils.ipaddr( kubernetes_subnet )"
-  with_items: "{{ ansible_all_ipv4_addresses | difference([kubernetes_vip_ip]) }}"
-
-- ansible.builtin.set_fact:
-    kubernetes_ip_address: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
-  when: 
-    - ansible_interfaces | length <= 2
-
-- ansible.builtin.set_fact:
-    kubernetes_image_repository: "registry.k8s.io"
   
 - block:
     
