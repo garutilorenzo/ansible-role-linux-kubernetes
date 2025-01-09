@@ -10,6 +10,12 @@
   when: ansible_os_family == 'Debian'
 
 - block:
+
+    - name: Install python3-libselinux
+      ansible.builtin.package:
+        name: python3-libselinux
+        state: present
+
     - name: Remove zram-generator-defaults
       ansible.builtin.dnf: 
         name: 
@@ -42,6 +48,13 @@
       when: 
         - disable_selinux
   when: ansible_os_family == 'RedHat'
+
+- name: Install containernetworking-plugins
+  ansible.builtin.package:
+    name: containernetworking-plugins
+    state: present
+  when: 
+    - ansible_distribution == 'Fedora'
 
 - name: Install openssl
   ansible.builtin.package: 
