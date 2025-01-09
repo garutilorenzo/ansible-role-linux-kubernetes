@@ -1,22 +1,12 @@
 ---
 
-- name: Install required system packages
-  ansible.builtin.dnf: 
-    name: 
-      - redhat-lsb-core
-    state: present
-    update_cache: yes 
-
-- shell: lsb_release -is
+- shell: . /etc/os-release && echo "$ID"
   register: lsb_release
 
 - name: Add Docker Repository
   ansible.builtin.get_url:
     url:  https://download.docker.com/linux/{{ lsb_release.stdout | lower }}/docker-ce.repo
     dest: /etc/yum.repos.d/docker-ce.repo
-
-- shell: uname -m
-  register: uname_m
 
 - name: Add K8s Repository
   ansible.builtin.blockinfile:

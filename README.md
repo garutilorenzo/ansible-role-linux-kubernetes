@@ -29,18 +29,21 @@ This role accept this variables:
 
 | Var   | Required |  Default | Desc |
 | ------- | ------- | ----------- |  ----------- |
-| `kubernetes_subnet`       | `yes`       |  `192.168.25.0/24` | Subnet where Kubernetess will be deployed. If the VM or bare metal server has more than one interface, Ansible will filter the interface used by Kubernetes based on the interface subnet |
+| `kubernetes_subnet`       | `no`       |  `192.168.25.0/24` | Subnet where Kubernetess will be deployed. If the VM or bare metal server has more than one interface, Ansible will filter the interface used by Kubernetes based on the interface subnet |
 | `disable_firewall`       | `no`       | `no`       | If set to yes Ansible will disable the firewall.   |
-| `kubernetes_version`       | `no`       | `1.25.0`       | Kubernetes version to install  |
+| `disable_selinux`        | `no`       | `yes`       | If set to yes Ansible will disable Selinux on RedHat based distro. Default `yes` [Ref.](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)  |
+| `kubernetes_version`       | `no`       | `1.31.4`       | Kubernetes version to install  |
+| `kubernetes_image_repository`       | `no`       | `registry.k8s.io`       | Default k8s registry  |
 | `kubernetes_cri`       | `no`       | `containerd`       | Kubernetes [CRI](https://kubernetes.io/docs/concepts/architecture/cri/) to install.   |
 | `kubernetes_cni`       | `no`       | `flannel`       | Kubernetes [CNI](https://github.com/containernetworking/cni) to install.  |
+| `flannel_version`       | `no`       | `v0.26.2`       | Required if  `kubernetes_cni` is set to `flannel`. Documentation available [here](https://github.com/flannel-io/flannel) |
 | `kubernetes_dns_domain`       | `no`       | `cluster.local`       | Kubernetes default DNS domain  |
 | `kubernetes_pod_subnet`       | `no`       | `10.244.0.0/16`       | Kubernetes pod subnet  |
 | `kubernetes_service_subnet`       | `no`       | `10.96.0.0/12`       | Kubernetes service subnet  |
 | `kubernetes_api_port`       | `no`       | `6443`       | kubeapi listen port  |
 | `setup_vip`       | `no`       | `no`       | Setup kubernetes VIP addres using [kube-vip](https://kube-vip.io/)   |
 | `kubernetes_vip_ip`       | `no`       | `192.168.25.225`       | **Required** if setup_vip is set to *yes*. Vip ip address for the control plane  |
-| `kubevip_version`       | `no`       | `v0.4.3`       | kube-vip container version  |
+| `kubevip_version`       | `no`       | `v0.8.7`       | kube-vip container version  |
 | `install_longhorn`       | `no`       | `no`       | Install [Longhorn](#longhorn), Cloud native distributed block storage for Kubernetes.  |
 | `longhorn_version`       | `no`       | `v1.3.1`       | Longhorn release.  |
 | `install_nginx_ingress`       | `no`       | `no`       | Install [nginx ingress controller](#nginx-ingress-controller)  |
