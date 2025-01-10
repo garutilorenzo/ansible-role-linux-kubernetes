@@ -44,7 +44,7 @@ certificatesDir: /etc/kubernetes/pki
 clusterName: kubernetes
 controllerManager: {}
 dns: {}
-imageRepository: {{ kubernetes_image_repository }}
+imageRepository: {{ kubernetes_image_registry }}
 kind: ClusterConfiguration
 kubernetesVersion: {{ kubernetes_version }}
 {% if groups['kubemaster'] | length > 1  %}

@@ -58,7 +58,7 @@
       ansible.builtin.lineinfile:
         path: /etc/containerd/config.toml
         regexp: '^\s*sandbox_image\s*=.*'
-        line: '    sandbox_image = "registry.k8s.io/pause:3.10"'
+        line: '    sandbox_image = "{{ kubernetes_pause_image }}"'
         
     - name: render crictl.yaml
       ansible.builtin.template:

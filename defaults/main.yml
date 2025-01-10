@@ -4,7 +4,8 @@ disable_firewall: no
 disable_selinux: yes # Ref. https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
 
 kubernetes_version: 1.31.4
-kubernetes_image_repository: registry.k8s.io
+kubernetes_image_registry: registry.k8s.io
+kubernetes_pause_image: registry.k8s.io/pause:3.10
 kubernetes_cri: containerd
 kubernetes_cni: flannel
 kubernetes_dns_domain: cluster.local
