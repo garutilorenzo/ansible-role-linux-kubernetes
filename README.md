@@ -9,6 +9,19 @@ This ansible role will install and configure a high available Kubernetes cluster
 
 This repo is only a example on how to use Ansible automation to install and configure a Kubernetes cluster. For a production environment use [Kubespray](https://kubespray.io)
 
+## Supported OS
+
+This role was tested with:
+
+Ubuntu:
+ * 22.04
+ * 24.06
+
+Fedora:
+ *  40
+
+Tested partially  with RHEL 8.
+
 ## Requirements
 
 Install ansible, ipaddr and netaddr:
@@ -29,7 +42,6 @@ This role accept this variables:
 
 | Var  |  Default | Desc |
 | ------- | ----------- |  ----------- |
-| `kubernetes_subnet`       |  `192.168.25.0/24` | Subnet where Kubernetess will be deployed. If the VM or bare metal server has more than one interface, Ansible will filter the interface used by Kubernetes based on the interface subnet |
 | `disable_firewall`       | If set to yes Ansible will disable the firewall.   |
 | `disable_selinux`        | `yes`       | If set to yes Ansible will disable Selinux on RedHat based distro. Default `yes` [Ref.](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)  |
 | `kubernetes_version`       | `1.31.4`       | Kubernetes version to install  |
@@ -42,13 +54,14 @@ This role accept this variables:
 | `kubernetes_pod_subnet`       | `10.244.0.0/16`       | Kubernetes pod subnet  |
 | `kubernetes_service_subnet`       | `10.96.0.0/12`       | Kubernetes service subnet  |
 | `kubernetes_api_port`       | `6443`       | kubeapi listen port  |
+| `kubernetes_subnet`       |  `192.168.25.0/24` | Subnet where Kubernetess will be deployed. If the VM or bare metal server has more than one interface, Ansible will filter the interface used by Kubernetes based on the interface subnet |
 | `setup_vip`       | Setup kubernetes VIP addres using [kube-vip](https://kube-vip.io/)   |
 | `kubernetes_vip_ip`       | `192.168.25.225`       | **Required** if setup_vip is set to *yes*. Vip ip address for the control plane  |
 | `kubevip_version`       | `v0.8.7`       | kube-vip container version  |
 | `install_longhorn`       | Install [Longhorn](#longhorn), Cloud native distributed block storage for Kubernetes.  |
-| `longhorn_version`       | `v1.3.1`       | Longhorn release.  |
+| `longhorn_version`       | `v1.7.2`       | Longhorn release.  |
 | `install_nginx_ingress`       | Install [nginx ingress controller](#nginx-ingress-controller)  |
-| `nginx_ingress_controller_version`       | `controller-v1.3.0`       | nginx ingress controller version  |
+| `nginx_ingress_controller_version`       | `v1.12.0`       | nginx ingress controller version  |
 | `nginx_ingress_controller_http_nodeport`       | `30080`       | NodePort used by nginx ingress controller for the incoming http traffic  |
 | `nginx_ingress_controller_https_nodeport`       | `30443`       |  NodePort used by nginx ingress controller for the incoming https traffic  |
 | `enable_nginx_ingress_proxy_protocol`       | Enable  nginx ingress controller proxy protocol mode |
