@@ -13,12 +13,9 @@ This repo is only a example on how to use Ansible automation to install and conf
 
 This role was tested with:
 
-Ubuntu:
- * 22.04
- * 24.04
+Ubuntu: 22.04, 24.04
 
-Fedora:
- *  40
+Fedora: 40
 
 Tested partially  with RHEL 8.
 
