@@ -15,7 +15,7 @@ This role was tested with:
 
 Ubuntu:
  * 22.04
- * 24.06
+ * 24.04
 
 Fedora:
  *  40
