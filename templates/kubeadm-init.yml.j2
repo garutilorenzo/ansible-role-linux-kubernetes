@@ -1,5 +1,5 @@
 ---
-apiVersion: kubeadm.k8s.io/v1beta3
+apiVersion: {{ kubernetes_api_version }}
 bootstrapTokens:
 - groups:
   - system:bootstrappers:kubeadm:default-node-token
@@ -13,32 +13,54 @@ localAPIEndpoint:
   advertiseAddress: {{ kubernetes_ip_address }}
   bindPort: {{ kubernetes_api_port }}
 nodeRegistration:
-  criSocket: {{ cri_socket_paths[kubernetes_cri] }}
+  criSocket: unix://{{ cri_socket_paths[kubernetes_cri] }}
   imagePullPolicy: IfNotPresent
+  imagePullSerial: true
   name: {{ ansible_hostname|lower }}
-  taints: null
+  taints:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/control-plane
+{% if kubernetes_api_version == 'kubeadm.k8s.io/v1beta4' %}
+timeouts:
+  controlPlaneComponentHealthCheck: 4m0s
+  discovery: 5m0s
+  etcdAPICall: 2m0s
+  kubeletHealthCheck: 4m0s
+  kubernetesAPICall: 1m0s
+  tlsBootstrap: 5m0s
+  upgradeManifests: 5m0s
+{% endif %}
 ---
 apiServer:
+{% if kubernetes_api_version == 'kubeadm.k8s.io/v1beta3' %}
   timeoutForControlPlane: 4m0s
+{% endif %}
   certSANs: 
 {% for san in apiserver_sans %}
   - "{{ san }}"
 {% endfor %}
-apiVersion: kubeadm.k8s.io/v1beta3
+apiVersion: {{ kubernetes_api_version }}
 certificatesDir: /etc/kubernetes/pki
 clusterName: kubernetes
 controllerManager: {}
 dns: {}
-imageRepository: {{ kubernetes_image_repository }}
+imageRepository: {{ kubernetes_image_registry }}
 kind: ClusterConfiguration
 kubernetesVersion: {{ kubernetes_version }}
 {% if groups['kubemaster'] | length > 1  %}
 controlPlaneEndpoint: {{ kubernetes_vip_ip }}:{{ kubernetes_api_port }}
 {% endif %}
+{% if kubernetes_api_version == 'kubeadm.k8s.io/v1beta4' %}
+caCertificateValidityPeriod: 87600h0m0s
+certificateValidityPeriod: 8760h0m0s
+{% endif %}
 networking:
   dnsDomain: {{ kubernetes_dns_domain }}
   podSubnet: {{ kubernetes_pod_subnet }}
   serviceSubnet: {{ kubernetes_service_subnet }}
+{% if kubernetes_api_version == 'kubeadm.k8s.io/v1beta4' %}
+proxy: {}
+{% endif %}
 scheduler: {}
 etcd:
   local:

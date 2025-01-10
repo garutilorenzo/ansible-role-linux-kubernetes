@@ -1,6 +1,12 @@
 ---
 
 - include_tasks: 
+    file: set_custom_fact.yml
+    apply:
+      tags: always
+  tags: always
+
+- include_tasks: 
     file: "{{ item }}"
     apply:
       tags: repo

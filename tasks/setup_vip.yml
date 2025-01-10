@@ -1,11 +1,9 @@
 ---
 
-- set_fact:
-    kubernetes_iface: "{{ hostvars[inventory_hostname]['ansible_' + item ]['device'] }}"
-  when: 
-    - hostvars[inventory_hostname]['ansible_' + item ].ipv4 is defined 
-    - hostvars[inventory_hostname]['ansible_' + item ]['ipv4']['address'] | ansible.utils.ipaddr( kubernetes_subnet )
-  with_items: "{{ ansible_interfaces }}"
+# kubevip needs super-admin.conf privileges
+# Ref. https://github.com/kube-vip/kube-vip/issues/684
+- ansible.builtin.set_fact:
+    kube_vip_permission: "{% if kubernetes_init_host is defined and  kubernetes_init_host == inventory_hostname %}super-admin.conf{% else %}admin.conf{% endif %}"
 
 - name: Create /etc/kubernetes/manifests/ directory
   ansible.builtin.file: 

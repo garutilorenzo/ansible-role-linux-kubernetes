@@ -1,5 +1,5 @@
 ---
-apiVersion: kubeadm.k8s.io/v1beta3
+apiVersion: {{ kubernetes_api_version }}
 kind: JoinConfiguration
 discovery:
   bootstrapToken:
@@ -8,7 +8,7 @@ discovery:
     caCertHashes: 
       - sha256:{{ kubeadm_ca_hash.stdout }}
 nodeRegistration:
-  criSocket: {{ cri_socket_paths[kubernetes_cri] }}
+  criSocket: unix://{{ cri_socket_paths[kubernetes_cri] }}
   imagePullPolicy: IfNotPresent
   name: {{ ansible_hostname|lower }}
   taints: null

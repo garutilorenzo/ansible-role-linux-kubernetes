@@ -3,7 +3,7 @@
 - block:
     - name: Download kube-flannel.yml
       ansible.builtin.get_url:
-        url: https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+        url: https://raw.githubusercontent.com/flannel-io/flannel/refs/tags/{{ flannel_version }}/Documentation/kube-flannel.yml
         dest: /root/kube-flannel.yml
 
     - name: Set flannel iface
@@ -11,6 +11,14 @@
         path: /root/kube-flannel.yml
         insertafter: '^(\s*).*kube-subnet-mgr(.*)$'
         line: '        - --iface={{ kubernetes_iface }}'
+    
+    - name: Fix cni-plugin path only for Fedora distribution
+      ansible.builtin.replace:
+        path: /root/kube-flannel.yml
+        regexp: '^(\s*)path: \/opt\/cni\/bin(.*)$'
+        replace: '\1path: /usr/libexec/cni'
+      when: 
+        - ansible_distribution == 'Fedora'
 
     - name: Install flannel
       ansible.builtin.command: kubectl apply -f /root/kube-flannel.yml

@@ -9,7 +9,7 @@
 
 - block:
     - name: Install ingress-nginx
-      ansible.builtin.command: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/{{ nginx_ingress_controller_version }}/deploy/static/provider/baremetal/deploy.yaml
+      ansible.builtin.command: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-{{ nginx_ingress_controller_version }}/deploy/static/provider/baremetal/deploy.yaml
       delegate_to: "{{ groups['kubemaster'][0] }}"
       run_once: true
 

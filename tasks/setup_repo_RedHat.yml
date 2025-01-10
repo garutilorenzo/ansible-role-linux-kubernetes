@@ -1,22 +1,12 @@
 ---
 
-- name: Install required system packages
-  ansible.builtin.dnf: 
-    name: 
-      - redhat-lsb-core
-    state: present
-    update_cache: yes 
-
-- shell: lsb_release -is
+- shell: . /etc/os-release && echo "$ID"
   register: lsb_release
 
 - name: Add Docker Repository
   ansible.builtin.get_url:
     url:  https://download.docker.com/linux/{{ lsb_release.stdout | lower }}/docker-ce.repo
     dest: /etc/yum.repos.d/docker-ce.repo
-
-- shell: uname -m
-  register: uname_m
 
 - name: Add K8s Repository
   ansible.builtin.blockinfile:
@@ -25,9 +15,8 @@
     block: |
       [kubernetes]
       name=Kubernetes
-      baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-{{ uname_m.stdout }}
+      baseurl=https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_major }}/rpm/
       enabled=1
       gpgcheck=1
-      repo_gpgcheck=1
-      gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-      exclude=kubelet kubeadm kubectl
+      gpgkey=https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_major }}/rpm/repodata/repomd.xml.key
+      exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni

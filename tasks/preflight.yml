@@ -10,34 +10,51 @@
   when: ansible_os_family == 'Debian'
 
 - block:
-    - name: Install iptables-legacy
-      ansible.builtin.dnf: 
-        name: 
-          - iptables-legacy
+
+    - name: Install python3-libselinux
+      ansible.builtin.package:
+        name: python3-libselinux
         state: present
-    
+
     - name: Remove zram-generator-defaults
       ansible.builtin.dnf: 
         name: 
           - zram-generator-defaults
         state: absent
 
+    - name: Gather the package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
     - name: disable firewalld
       ansible.builtin.systemd:
         name: firewalld 
         state: stopped 
         enabled: no
-      when: disable_firewall
+      when: 
+        - disable_firewall
+        - "'firewalld' in ansible_facts.packages"
 
     - name: Put SELinux in permissive mode, logging actions that would be blocked.
       ansible.posix.selinux:
         policy: targeted
         state: permissive
+      when: 
+        - disable_selinux
 
     - name: Disable SELinux
       ansible.posix.selinux:
         state: disabled
+      when: 
+        - disable_selinux
   when: ansible_os_family == 'RedHat'
+
+- name: Install containernetworking-plugins
+  ansible.builtin.package:
+    name: containernetworking-plugins
+    state: present
+  when: 
+    - ansible_distribution == 'Fedora'
 
 - name: Install openssl
   ansible.builtin.package: 
@@ -81,32 +98,6 @@
     regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
     replace: '#\1\2\3swap\4'
     backup: yes
-
-- name: check iptables version
-  ansible.builtin.shell: iptables --version
-  register: iptables_version
-  ignore_errors: true
-
-- block:  
-    - community.general.alternatives:
-        name: iptables
-        link: /usr/sbin/iptables
-        path: /usr/sbin/iptables-legacy
-
-    - community.general.alternatives:
-        name: ip6tables
-        link: /usr/sbin/ip6tables
-        path: /usr/sbin/ip6tables-legacy
-
-    - ansible.builtin.reboot:
-        msg: "Reboot initiated by Ansible for iptables-legacy"
-        connect_timeout: 5
-        reboot_timeout: 300
-        pre_reboot_delay: 0
-        post_reboot_delay: 30
-        test_command: uptime
-  when: '"nf_tables" in iptables_version.stdout'
-  ignore_errors: "{{ ansible_check_mode }}"
 
 - block:
     - name: Install open-iscsi,nfs-common using apt

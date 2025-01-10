@@ -23,8 +23,7 @@
 
     - name: Render containerd default config
       ansible.builtin.shell: containerd config default > /etc/containerd/config.toml
-      when: 
-        - containerd_config.found
+      when: containerd_config.found
 
     - name: enable SystemdCgroup for containerd
       ansible.builtin.replace:
@@ -34,6 +33,38 @@
       notify:
         - reload containerd
     
+    - name: Update the [grpc] block in /etc/containerd/config.toml
+      ansible.builtin.blockinfile:
+        path: /etc/containerd/config.toml
+        marker: "{mark}"
+        block: |2
+            address = "{{ cri_socket_paths[kubernetes_cri] }}"
+            gid = 0
+            max_recv_message_size = 16777216
+            max_send_message_size = 16777216
+            tcp_address = ""
+            tcp_tls_ca = ""
+            tcp_tls_cert = ""
+            tcp_tls_key = ""
+            uid = 0
+        marker_begin: "[grpc]"
+        marker_end: "[metrics]"
+      notify:
+        - reload containerd
+
+    # container runtime is inconsistent with that used by kubeadm
+    # Ref. https://github.com/kubernetes/kubeadm/issues/3146
+    - name: Update sandbox_image in /etc/containerd/config.toml
+      ansible.builtin.lineinfile:
+        path: /etc/containerd/config.toml
+        regexp: '^\s*sandbox_image\s*=.*'
+        line: '    sandbox_image = "{{ kubernetes_pause_image }}"'
+        
+    - name: render crictl.yaml
+      ansible.builtin.template:
+        src: crictl.yaml.j2
+        dest: /etc/crictl.yaml
+    
     - name: start and enable containerd
       ansible.builtin.systemd:
         name: containerd
@@ -41,50 +72,6 @@
         enabled: yes
         
   when: kubernetes_cri == 'containerd'
-
-# Fedora hack
-- name: Check if /opt/cni/bin directory exist
-  ansible.builtin.stat:
-    path: /opt/cni/bin
-  register: cni_bin_dir
-
-- block:
-    - name: Install containernetworking-plugins
-      ansible.builtin.package:
-        name: containernetworking-plugins
-        state: present
-
-    - name: stop containerd
-      ansible.builtin.systemd:
-        name: containerd
-        state: stopped
-
-    - name: Create /opt/cni/ directory
-      ansible.builtin.file: 
-        name: /opt/cni/
-        state: directory
-
-    - name: Remove /opt/cni/bin directory if exist
-      ansible.builtin.file: 
-        name: /opt/cni/bin
-        state: removed
-
-    - name: Create symlink from /usr/libexec/cni to /opt/cni/bin
-      ansible.builtin.file:
-        src: /usr/libexec/cni
-        dest: /opt/cni/bin
-        state: link
-
-    - name: start containerd
-      ansible.builtin.systemd:
-        name: containerd
-        state: started
-  when: 
-    - ansible_distribution == 'Fedora'
-    - kubernetes_cri == 'containerd'
-    - cni_bin_dir.stat.islnk is defined
-    - not cni_bin_dir.stat.islnk
-# END Fedora hack
 
 - name: Force all notified handlers to run now
   meta: flush_handlers

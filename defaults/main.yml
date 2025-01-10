@@ -1,8 +1,11 @@
 ---
 
 disable_firewall: no
+disable_selinux: yes # Ref. https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
 
-kubernetes_version: 1.27.3
+kubernetes_version: 1.31.4
+kubernetes_image_registry: registry.k8s.io
+kubernetes_pause_image: registry.k8s.io/pause:3.10
 kubernetes_cri: containerd
 kubernetes_cni: flannel
 kubernetes_dns_domain: cluster.local
@@ -15,13 +18,14 @@ kubernetes_subnet: 192.168.25.0/24
 setup_vip: no
 kubernetes_vip_ip: 192.168.25.225
 
-kubevip_version: v0.6.0
+kubevip_version: v0.8.7
+flannel_version: v0.26.2
 
 install_longhorn: no
-longhorn_version: v1.4.3
+longhorn_version: v1.7.2
 
 install_nginx_ingress: no
-nginx_ingress_controller_version: controller-v1.8.1
+nginx_ingress_controller_version: v1.12.0
 nginx_ingress_controller_http_nodeport: 30080
 nginx_ingress_controller_https_nodeport: 30443
 enable_nginx_ingress_proxy_protocol: no
