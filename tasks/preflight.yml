@@ -114,4 +114,4 @@
         enabled: yes
   when:
     - install_longhorn
-    # - inventory_hostname in groups['kubeworker']
+    - inventory_hostname in groups['kubeworker']
